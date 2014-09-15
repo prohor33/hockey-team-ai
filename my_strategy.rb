@@ -12,6 +12,8 @@ class MyStrategy
   def move(me, world, game, move)
     move.speed_up = -1.0
     move.turn = Math::PI
-    move.action = ActionType::STRIKE
+    # move.action = ActionType::STRIKE
+
+    Player p = world.getOpponentPlayer();
   end
 end
