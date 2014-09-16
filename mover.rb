@@ -1,9 +1,24 @@
+require './logic'
+
 class Mover
+
+  # @param [Hockeyist] hock
+  def self.get_move_for_hock(hock)
+    move_tmp = Logic.moves[hock.id]
+    if (!move_tmp)
+      puts 'error set moving'
+    end
+    # puts 'set move'
+    move_tmp
+  end
+  
+  STRIKE_ANGLE = 1.0 * Math::PI / 180.0
+  
   # @param [Hockeyist] me
   # @param [World] world
   # @param [Game] game
   # @param [Move] move
-  def move(me, world, game, move)
+  def just_function(me, world, game, move)
 
     opp_player = world.get_opponent_player
     my_player = world.get_my_player

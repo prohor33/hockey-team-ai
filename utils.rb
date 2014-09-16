@@ -1,4 +1,5 @@
 require "./logic"
+require './model/unit'
 
 class Utils
   
@@ -8,7 +9,7 @@ class Utils
     min = Logic.world.width
     min_hock = nil
     for hock in Logic.world.hockeyists
-      dist = hock.get_distance(x, y)
+      dist = hock.get_distance_to(x, y)
       if (dist < min)
         min = dist
         min_hock = hock

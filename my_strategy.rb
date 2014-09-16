@@ -9,27 +9,37 @@ require './mover'
 
 class MyStrategy
   
-  STRIKE_ANGLE = 1.0 * Math::PI / 180.0
-  
   @@logic_runned = false
- 
-  @@mover = Mover.new
  
   # @param [Hockeyist] me
   # @param [World] world
   # @param [Game] game
   # @param [Move] move
-  def move(me, world, game, move)
-    # move.speed_up = -1.0
-    # move.turn = Math::PI
-    # move.action = ActionType::STRIKE
+  def move(me, world, game, moving_data)
     
+    smart_hock = false
     if (!@@logic_runned)
       @@logic_runned = true
-      Logic.instance.run_logic(world, game, move)
+      smart_hock = true
+      Logic.instance.run_logic(world, game)
     end
 
-    mover.move(me, world, game, move)
- 
+    # move.speed_up = Mover.get_move_for_hock(me).speed_up
+
+    hock_move = Mover.get_move_for_hock(me)
+    # moving_data = hock_move.clone
+    
+    # wtf? how to clone in ruby?? :)
+    moving_data.speed_up = hock_move.speed_up
+    moving_data.action = hock_move.action
+    moving_data.turn = hock_move.turn
+
+    if (!smart_hock)
+      end_logic
+    end
+  end
+  
+  def end_logic
+    @@logic_runned = false
   end
 end
