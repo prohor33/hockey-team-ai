@@ -4,10 +4,16 @@ require './model/move'
 require './model/hockeyist'
 require './model/world'
 require './model/unit'
+require './logic'
+require './mover'
 
 class MyStrategy
   
   STRIKE_ANGLE = 1.0 * Math::PI / 180.0
+  
+  @@logic_runned = false
+ 
+  @@mover = Mover.new
  
   # @param [Hockeyist] me
   # @param [World] world
@@ -17,32 +23,13 @@ class MyStrategy
     # move.speed_up = -1.0
     # move.turn = Math::PI
     # move.action = ActionType::STRIKE
-
-    opp_player = world.get_opponent_player
-    my_player = world.get_my_player
-    # opp_player.neck.
     
-    if (world.puck.owner_player_id == my_player.id)
-      # puck is mine now!
-      # print "puck is mine now"
-      #move.turn = opp_player.net.center
-      move.turn = Math::PI
-      
-      net_x = 0.5 * (opp_player.net_back + opp_player.net_front)
-      net_y = 0.5 * (opp_player.net_bottom + opp_player.net_top)
-      
-      angle_to_net = me.get_angle_to(net_x, net_y) 
-      move.turn = angle_to_net
-      
-      if (angle_to_net.abs < STRIKE_ANGLE)
-        move.action = ActionType::STRIKE
-      end
-    else
-      # need to get puck back
-      move.speed_up = 1.0
-      move.turn = me.get_angle_to_unit(world.puck)
-      move.action = ActionType::TAKE_PUCK
+    if (!@@logic_runned)
+      @@logic_runned = true
+      Logic.instance.run_logic(world, game, move)
     end
+
+    mover.move(me, world, game, move)
  
   end
 end
