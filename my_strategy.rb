@@ -24,18 +24,14 @@ class MyStrategy
       Logic.instance.run_logic(world, game)
     end
 
-    # move.speed_up = Mover.get_move_for_hock(me).speed_up
-
-    hock_move = Mover.get_move_for_hock(me)
-    # moving_data = hock_move.clone
-    
-    # wtf? how to clone in ruby?? :)
-    moving_data.speed_up = hock_move.speed_up
-    moving_data.action = hock_move.action
-    moving_data.turn = hock_move.turn
+    hock_move = Mover.get_move_for_hock(me)    
+    Utils.clone_move(moving_data, hock_move)
 
     if (!smart_hock)
       end_logic
+      # puts "not smart"
+    else
+      # puts "smart"
     end
   end
   

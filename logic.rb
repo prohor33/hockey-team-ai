@@ -79,19 +79,22 @@ class Logic
   
   def defense
     # find the nearest to the puck hockeyist
-    hock = Utils.find_the_nearest_hock_from_unit(@world.puck)
+    hock = Utils.find_the_nearest_player_hock_from_unit(@world.get_my_player, @world.puck)
     # send him to the puck
-    @@moves[hock.id].turn = hock.get_angle_to_unit(@world.puck)
-    @@moves[hock.id].action = ActionType::TAKE_PUCK
-    @@moves[hock.id].speed_up = 1.0
+    @moves[hock.id].turn = hock.get_angle_to_unit(@world.puck)
+    @moves[hock.id].action = ActionType::TAKE_PUCK
+    @moves[hock.id].speed_up = 1.0
     # puts 'defense'
   end
   
   def attack
     # puts "attack"
+    hock = Utils.find_the_nearest_hock_from_unit(@world.puck)
+    @moves[hock.id].action = ActionType::STRIKE
   end
-  
+
   def search
     # puts "search"
+    defense
   end
 end
