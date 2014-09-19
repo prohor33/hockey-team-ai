@@ -52,4 +52,54 @@ class Utils
     target_move.teammate_index = src_move.teammate_index
   end
   
+  # param [Hockeyist] hock
+  # param [Unit] target
+  # param [ActionType] action
+  def self.send_hock_to_unit(hock, target, action)
+    Logic.moves[hock.id].turn = hock.get_angle_to_unit(target)
+    Logic.moves[hock.id].action = action
+    Logic.moves[hock.id].speed_up = 1.0
+  end
+  
+  # param [Hockeyist] hock
+  # param [Point] target_p
+  # param [ActionType] action
+  def self.send_hock_to_p(hock, target_p, action)
+    Logic.moves[hock.id].turn = get_hock_angle_to_p(hock, target_p)
+    Logic.moves[hock.id].action = action
+    Logic.moves[hock.id].speed_up = 1.0
+  end
+  
+  # param [Hockeyist] hock
+  def self.get_other_hock(not_this_hock)
+    for hock in Logic.world.hockeyists
+      if (hock.player_id != Logic.me.id)
+        next
+      end
+      if (hock.id == not_this_hock.id)
+        return hock
+      end
+    end
+    nil
+  end
+  
+  # param [Point] start_p
+  # param [Point] end_p
+  # param [Float] coef
+  def self.get_point_between_two_points(start_p, end_p, coef)
+    start_p + (end_p - start_p) * coef;
+  end
+  
+  # param [Point] start_p
+  # param [Point] end_p
+  def self.get_middle_between_two_points(start_p, end_p)
+    get_point_between_two_points(start_p, end_p, 0.5)
+  end
+  
+  # param [Hockeyist] hock
+  # param [Point] target_p
+  def self.get_hock_angle_to_p(hock, target_p)
+    hock.get_angle_to_unit(target_p.get_unit)
+  end
+  
 end
