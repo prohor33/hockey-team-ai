@@ -58,12 +58,8 @@ class Attack
     # Update hockeyists
     @puck_hock = Utils.get_hock_by_id(@puck_hock.id)
     @assist_hock = Utils.get_hock_by_id(@assist_hock.id)
-    
-    net_p = Utils.get_player_net_p(Logic.world.get_opponent_player)
-    net_size = Utils.get_player_net_size(Logic.world.get_opponent_player)
-    attack_p = net_p + net_size / 2.0
- 
-    Utils.send_hock_to_p(@puck_hock, attack_p, ActionType::SWING)
+
+    Utils.send_hock_to_p(@puck_hock, Utils.get_target_p_in_net(@puck_hock), ActionType::SWING)
     
     if (@puck_hock.last_action == ActionType::SWING)
       last_action_time_lef = Logic.game.tick_count - @puck_hock.last_action_tick
@@ -84,7 +80,6 @@ class Attack
     # puts 'get rid of the puck'
     Utils.send_hock(@puck_hock, 0, ActionType::STRIKE, 0)
   end
-
 end
 
 

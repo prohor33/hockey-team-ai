@@ -192,6 +192,19 @@ class Utils
     end
     !is_puck_in_danger
   end
+  
+    # @param [Hockeyist] hock
+  def self.get_target_p_in_net(hock)
+    rink_centre = (Logic.game.rink_bottom + Logic.game.rink_top) / 2.0
+    target_down = hock.y > rink_centre
+    net_p = Utils.get_player_net_p(Logic.world.get_opponent_player)
+    net_size = Utils.get_player_net_size(Logic.world.get_opponent_player)
+    delta_y = net_size.y / 2.0 * 0.8
+    attack_p = net_p
+    attack_p.y += !target_down ? delta_y : -delta_y
+    attack_p
+  end
+  
 end
 
 
