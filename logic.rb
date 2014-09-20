@@ -9,6 +9,9 @@ require './utils'
 require './logic_state'
 require './point'
 require 'singleton'
+require './defense'
+require './search'
+require './attack'
 
 class Logic
   include Singleton
@@ -24,7 +27,7 @@ class Logic
     @@world = world_tmp
   end
   
-  @@game
+  @@game = nil
   def self.game
     @@game
   end
@@ -32,17 +35,26 @@ class Logic
     @@world = game_tmp
   end
   
+  @@puck = nil
+  def self.puck
+    @@puck
+  end
+  
   @@me = nil
   def self.me
     @@me
   end
+  
+  @@old_state = LogicState::NONE
 
   def new_tick
     Mover.new_tick
     @world = @@world
     @game = @@game
     @@me = @world.get_my_player
-    @me = @@me    
+    @me = @@me 
+    @@puck = @world.puck
+    @puck = @@puck    
   end
 
   # @param [World] world_tmp
@@ -71,29 +83,38 @@ class Logic
     else
     puts "error state"
     end
+    
+    @@old_state = @state
   end
 
   def defense
-    attacker = Utils.find_the_nearest_player_hock_from_unit(@world.get_my_player, @world.puck)
-    Utils.send_hock_to_unit(attacker, @world.puck, ActionType::TAKE_PUCK)
-    
-    # puts attacker.id
-    defender = Utils.get_other_hock(attacker)
-    net_p = Point.new(@me.net_back, (@me.net_top + @me.net_bottom) / 2.0)
-    defend_p = Utils.get_middle_between_two_points(Point.from_unit(@world.puck), net_p)
-    Utils.send_hock_to_p(defender, defend_p, ActionType::TAKE_PUCK)
-  # puts 'defense'
+    # puts 'defense'
+    if (@@old_state != LogicState::DEFENSE)
+      Defense.start
+    end
+    Defense.iter
   end
 
   def attack
-    # puts "attack"
-    defense
-    # hock = Utils.find_the_nearest_player_hock_from_unit(@me, @world.puck)
-    # Mover.moves[hock.id].action = ActionType::STRIKE
+    if (@@old_state != LogicState::ATTACK)
+      Attack.decide
+    end
+    Attack.iter
   end
 
   def search
-    # puts "search"
-    defense
+    # puts 'search'
+    if (@@old_state != LogicState::SEARCHING)
+      # Search.start
+      Defense.start
+    end
+    # Search.iter
+    Defense.iter
   end
 end
+
+
+
+
+
+

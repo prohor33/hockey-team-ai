@@ -2,10 +2,10 @@ require './model/unit'
 
 class Point
   # @return [Float]
-  attr_reader :x
+  attr_accessor :x
   
   # @return [Float]
-  attr_reader :y
+  attr_accessor :y
   
   # param [Float] x
   # param [Float] y
@@ -51,6 +51,11 @@ class Point
   # param [Float] p
   def *(coef)
     Point.new(@x * coef, @y * coef)
+  end
+  
+  # param [Float] p
+  def /(coef)
+    Point.new(@x / coef, @y / coef)
   end
   
   def get_unit()

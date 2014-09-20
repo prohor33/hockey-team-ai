@@ -1,5 +1,6 @@
 module LogicState
-  DEFENSE = 0
-  ATTACK = 1
-  SEARCHING = 2
+  NONE = 0
+  DEFENSE = 1
+  ATTACK = 2
+  SEARCHING = 3
 end
