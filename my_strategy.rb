@@ -11,23 +11,26 @@ class MyStrategy
   
   @@logic_runned = false
  
-  # @param [Hockeyist] me
+  # @param [Hockeyist] hock
   # @param [World] world
   # @param [Game] game
   # @param [Move] move
-  def move(me, world, game, moving_data)
+  def move(hock, world, game, moving_data)
     
-    smart_hock = false
+    first_hock = false
     if (!@@logic_runned)
       @@logic_runned = true
-      smart_hock = true
+      first_hock = true
       Logic.instance.run_logic(world, game)
     end
 
-    hock_move = Mover.get_move_for_hock(me)    
-    Utils.clone_move(moving_data, hock_move)
+    # just testing 
+    # if (first_hock)
+      hock_move = Mover.get_move_for_hock(hock)    
+      Utils.clone_move(moving_data, hock_move)
+    # end
 
-    if (!smart_hock)
+    if (!first_hock)
       end_logic
       # puts "not smart"
     else

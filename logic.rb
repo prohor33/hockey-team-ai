@@ -31,14 +31,6 @@ class Logic
   def self.game=game_tmp
     @@world = game_tmp
   end
-  @@moves = Hash.new{nil}
-
-  def self.moves
-    @@moves
-  end
-  def self.moves=moves_tmp
-    @@moves = move_tmp
-  end
   
   @@me = nil
   def self.me
@@ -46,17 +38,11 @@ class Logic
   end
 
   def new_tick
-    @@moves = Hash.new
+    Mover.new_tick
     @world = @@world
     @game = @@game
-    @moves = @@moves
     @@me = @world.get_my_player
-    @me = @@me
-
-    for hock in @world.hockeyists
-      @moves[hock.id] = Move.new
-    end
-    
+    @me = @@me    
   end
 
   # @param [World] world_tmp
@@ -101,8 +87,9 @@ class Logic
 
   def attack
     # puts "attack"
-    hock = Utils.find_the_nearest_player_hock_from_unit(@me, @world.puck)
-    @moves[hock.id].action = ActionType::STRIKE
+    defense
+    # hock = Utils.find_the_nearest_player_hock_from_unit(@me, @world.puck)
+    # Mover.moves[hock.id].action = ActionType::STRIKE
   end
 
   def search

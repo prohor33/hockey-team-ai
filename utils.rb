@@ -1,14 +1,18 @@
 require "./logic"
 require './model/unit'
+require './model/hockeyist_type'
 
 class Utils
   
   # param [Float] x
   # param [Float] y
-  def self.find_the_nearest_hock(x, y)
+  def self.find_the_nearest_hock(x, y)  # except goalie
     min = Logic.world.width * 10
     min_hock = nil
     for hock in Logic.world.hockeyists
+      if (hock.type == HockeyistType::GOALIE)
+        next
+      end
       dist = hock.get_distance_to(x, y)
       if (dist < min)
         min = dist
@@ -30,6 +34,9 @@ class Utils
     min_hock = nil
     for hock in Logic.world.hockeyists
       if (hock.player_id != player.id)
+        next
+      end
+      if (hock.type == HockeyistType::GOALIE)
         next
       end
       dist = hock.get_distance_to(unit.x, unit.y)
@@ -56,27 +63,30 @@ class Utils
   # param [Unit] target
   # param [ActionType] action
   def self.send_hock_to_unit(hock, target, action)
-    Logic.moves[hock.id].turn = hock.get_angle_to_unit(target)
-    Logic.moves[hock.id].action = action
-    Logic.moves[hock.id].speed_up = 1.0
+    Mover.moves[hock.id].turn = hock.get_angle_to_unit(target)
+    Mover.moves[hock.id].action = action
+    Mover.moves[hock.id].speed_up = 1.0
   end
   
   # param [Hockeyist] hock
   # param [Point] target_p
   # param [ActionType] action
   def self.send_hock_to_p(hock, target_p, action)
-    Logic.moves[hock.id].turn = get_hock_angle_to_p(hock, target_p)
-    Logic.moves[hock.id].action = action
-    Logic.moves[hock.id].speed_up = 1.0
+    Mover.moves[hock.id].turn = get_hock_angle_to_p(hock, target_p)
+    Mover.moves[hock.id].action = action
+    Mover.moves[hock.id].speed_up = 1.0
   end
   
   # param [Hockeyist] hock
   def self.get_other_hock(not_this_hock)
     for hock in Logic.world.hockeyists
-      if (hock.player_id != Logic.me.id)
+      if (!hock.teammate)
         next
       end
-      if (hock.id == not_this_hock.id)
+      if (hock.type == HockeyistType::GOALIE)
+        next
+      end
+      if (hock.id != not_this_hock.id)
         return hock
       end
     end
