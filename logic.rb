@@ -105,11 +105,9 @@ class Logic
   def search
     # puts 'search'
     if (@@old_state != LogicState::SEARCHING)
-      # Search.start
-      Defense.start
+      Search.start
     end
-    # Search.iter
-    Defense.iter
+    Search.iter
   end
 end
 

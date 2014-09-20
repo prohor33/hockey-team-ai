@@ -205,6 +205,22 @@ class Utils
     attack_p
   end
   
+  # @param [Hockeyist] hock
+  def self.cancel_strike(hock)
+    if (hock.last_action == ActionType::SWING)
+      puts 'warning: cancel the strike'
+      Utils.send_hock(hock, 0, ActionType::CANCEL_STRIKE, 0)
+      return true
+    end
+    false
+  end
+  
+  # @param [Hockeyist] hock
+  def self.is_angle_to_strike(hock, target_p)
+    min_delta_angle = Math::PI / 180.0
+    get_hock_angle_to_p(hock, target_p) <= min_delta_angle
+  end
+  
 end
 
 

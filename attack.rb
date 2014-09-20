@@ -9,6 +9,7 @@ require './utils'
 require './logic_state'
 require './point'
 require 'singleton'
+require './smart_utils'
 
 module AttackStrategy
   ATTACK = 0
@@ -59,16 +60,30 @@ class Attack
     @puck_hock = Utils.get_hock_by_id(@puck_hock.id)
     @assist_hock = Utils.get_hock_by_id(@assist_hock.id)
 
-    Utils.send_hock_to_p(@puck_hock, Utils.get_target_p_in_net(@puck_hock), ActionType::SWING)
+    net_target_p = Utils.get_target_p_in_net(@puck_hock)
+    too_close_to_strike = SmartUtils.too_close_to_strike(@puck_hock)
+    too_far_to_strike = SmartUtils.too_far_to_strike(@puck_hock)
     
-    if (@puck_hock.last_action == ActionType::SWING)
-      last_action_time_lef = Logic.game.tick_count - @puck_hock.last_action_tick
-      if (@puck_hock.swing_ticks >= Logic.game.max_effective_swing_ticks)
-        Mover.moves[@puck_hock.id].action = ActionType::STRIKE
+    Utils.send_hock_to_p(@puck_hock, net_target_p, ActionType::SWING)
+    
+    if (Utils.is_angle_to_strike(@puck_hock, net_target_p))
+      need_to_strike = false
+    
+      if (too_close_to_strike)
+        need_to_strike = true
+      end
+      if (@puck_hock.last_action == ActionType::SWING)
+        last_action_time_lef = Logic.game.tick_count - @puck_hock.last_action_tick
+        if (@puck_hock.swing_ticks >= Logic.game.max_effective_swing_ticks)
+          need_to_strike = true
+        end
+      end
+      
+      if (need_to_strike)
+        Utils.send_hock_to_p(@puck_hock, net_target_p, ActionType::STRIKE)
       end
     end
-    
-    
+
     # other hock stays in the middle
     # net_p = Point.new(Logic.me.net_back, (Logic.me.net_top + Logic.me.net_bottom) / 2.0)
     net_p = Utils.get_player_net_p(Logic.me)
