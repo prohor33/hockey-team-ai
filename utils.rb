@@ -2,6 +2,7 @@ require "./logic"
 require './model/unit'
 require './model/hockeyist_type'
 require './game_const'
+require './axis'
 
 class Utils
   
@@ -89,6 +90,24 @@ class Utils
   end
   
   # @param [Hockeyist] hock
+  # @param [Float] pass_angle
+  # @param [Float] pass_power
+  def self.send_hock_to_pass(hock, pass_angle, pass_power)
+    Mover.moves[hock.id].turn = 0.0
+    Mover.moves[hock.id].action = ActionType::PASS
+    Mover.moves[hock.id].speed_up = 0.0
+    Mover.moves[hock.id].pass_angle = pass_angle
+    Mover.moves[hock.id].pass_power = pass_power
+  end
+  
+  # @param [Hockeyist] hock
+  # @param [Point] target_p
+  # @param [Float] pass_power
+  def self.send_hock_to_pass_to_p(hock, target_p, pass_power)
+    send_hock_to_pass(hock, hock.get_angle_to(target_p.x, target_p.y), pass_power)
+  end
+  
+  # @param [Hockeyist] hock
   def self.get_my_other_hock(not_this_hock)
     for hock in Logic.world.hockeyists
       if (!hock.teammate)
@@ -146,12 +165,22 @@ class Utils
   # @param [Float] area_angle
   # @return [False/True class]
   def self.is_unit_in_the_hock_area_spec(hock, unit, area_size, area_angle)
+    is_unit_in_the_hock_area_spec_rot_angle(hock, unit, area_size, area_angle, 0)
+  end
+  
+  # @param [Hockeyist] hock
+  # @param [Unit] unit
+  # @param [Float] area_size
+  # @param [Float] area_angle
+  # @param [Float] rot_angle
+  # @return [False/True class]
+  def self.is_unit_in_the_hock_area_spec_rot_angle(hock, unit, area_size, area_angle, rot_angle)
     dist = hock.get_distance_to_unit(unit)
     if (dist > area_size)
       return false
     end
     angle = hock.get_angle_to_unit(unit)
-    if (angle > area_angle || angle < -area_angle)
+    if (angle > (rot_angle + area_angle) || angle < (rot_angle - area_angle))
       return false
     end
     return true
@@ -175,18 +204,24 @@ class Utils
   
   # @param [Hockeyist]
   def self.is_danger_area_clear(hock)
+    is_danger_area_clear_rot_angle(hock, 0)
+  end
+  
+  # @param [Hockeyist]
+  # @param [Float] rot_angle
+  def self.is_danger_area_clear_rot_angle(hock, rot_angle)
     danger_area_size = GameConst::AREA_SIZE + 20
     danger_area_angle = GameConst::AREA_ANGLE + Math::PI / 20.0
     
     is_puck_in_danger = false
     for hock_i in Logic.world.hockeyists
-      if (hock_i.player_id == Logic.me)
+      if (hock_i.player_id == Logic.me.id)
         next
       end
       if (hock_i.type == HockeyistType::GOALIE)
         next
       end
-      if (Utils.is_unit_in_the_hock_area_spec(hock, hock_i, danger_area_size, danger_area_angle))
+      if (Utils.is_unit_in_the_hock_area_spec_rot_angle(hock, hock_i, danger_area_size, danger_area_angle, rot_angle))
         is_puck_in_danger = true
         break
       end
@@ -201,7 +236,7 @@ class Utils
     
     can_kick = false
     for hock_i in Logic.world.hockeyists
-      if (hock_i.player_id == Logic.me)
+      if (hock_i.player_id == Logic.me.id)
         next
       end
       if (hock_i.type == HockeyistType::GOALIE)
@@ -243,9 +278,15 @@ class Utils
     get_hock_angle_to_p(hock, target_p) <= min_delta_angle
   end
   
+  # @param [Hockeyist] hock
+  def self.is_angle_to_pass(hock, target_p)
+    min_delta_angle = Math::PI / 3.0
+    get_hock_angle_to_p(hock, target_p) <= min_delta_angle
+  end
+  
   # @param [Hockeyist] attacker
   # @param [Hockeyist] another
-  def self.can_hock_kick_aother_one(attacker, another)
+  def self.can_hock_kick_another_one(attacker, another)
     angle = attacker.get_angle_to_unit(another)
     dist = attacker.get_distance_to_unit(another)
     if (angle.abs > GameConst::AREA_ANGLE)
@@ -255,6 +296,48 @@ class Utils
       return false
     end
     return true
+  end
+  
+  # @param [Unit] unit
+  # @param [Float] angle_dir
+  # @param [Float] dist
+  def self.get_p_in_direction_from_unit(unit, angle_dir, dist)
+    angle = unit.angle + angle_dir
+    p_dir = Point.new(1.0, Math.tan(angle))
+    p_dir.normalize
+    p_dir *= dist
+    Point.new(unit.x, unit.y) + p_dir
+  end
+  
+  # @param [Point] p
+  def self.is_p_out_of_rink(p)
+    if (p.x < Logic.game.rink_left || p.x > Logic.game.rink_right)
+      return true
+    end
+    if (p.y > Logic.game.rink_bottom || p.y < Logic.game.rink_top)
+      return true
+    end
+    return false
+  end
+  
+  # @param [Point] p
+  # @param [Axis] axis
+  # @param [True/False] is_more
+  def self.mirror_point(p, axis, is_more)
+    case axis
+    when Axis::X
+      edge_x = is_more ? Logic.game.rink_right : Logic.game.rink_left
+      dist_to_ege = (p.x - edge_x).abs
+      new_x = is_more ? edge_x + dist_to_ege : edge_x - dist_to_ege
+      return Point.new(new_x, p.y)
+    when Axis::Y
+      edge_y = is_more ? Logic.game.rink_bottom : Logic.game.rink_top
+      dist_to_ege = (p.y - edge_y).abs
+      new_y = is_more ? edge_y + dist_to_ege : edge_y - dist_to_ege
+      return Point.new(p.x, new_y)
+    else
+      puts 'error axis'
+    end
   end
   
 end

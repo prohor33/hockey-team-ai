@@ -62,5 +62,14 @@ class Point
     Unit.new(0, 0, 0, @x, @y, 0, 0, 0, 0)
   end
   
+  def length
+    Math.sqrt(@x * @x + @y * @y)
+  end
+  
+  def normalize
+    l = length
+    @x /= l
+    @y /= l
+  end
 
 end

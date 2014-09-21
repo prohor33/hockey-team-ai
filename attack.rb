@@ -10,6 +10,7 @@ require './logic_state'
 require './point'
 require 'singleton'
 require './smart_utils'
+require './axis'
 
 module AttackStrategy
   ATTACK = 0
@@ -32,6 +33,8 @@ class Attack
     
     # Observer situation
     is_danger = SmartUtils.can_smb_kick_hock(@puck_hock)
+    
+    # @strategy = AttackStrategy::GET_RID_OF_PUCK
     
     if (is_danger)
       # need to get rid of the puck
@@ -99,7 +102,95 @@ class Attack
   
   def self.get_rid_of_puck
     # puts 'get rid of the puck'
-    Utils.send_hock(@puck_hock, 0, ActionType::STRIKE, 0)
+    @puck_hock = Utils.get_hock_by_id(@puck_hock.id)
+    @assist_hock = Utils.get_hock_by_id(@assist_hock.id)
+    
+    pass_p = find_place_to_pass
+    
+    if (!pass_to_p_accordingly_borders(pass_p))
+      puts 'could not find save way to pass => just attack'
+      @strategy = AttackStrategy::ATTACK
+      attack
+    end
+    
+    # angle_to_pass = Utils.get_hock_angle_to_p(@puck_hock, pass_p)
+    # Utils.send_hock(@puck_hock, angle_to_pass, ActionType::NONE, 0.0)
+#     
+    # if (Utils.is_angle_to_pass(@puck_hock, pass_p))
+      # puts 'pass'
+      # Utils.send_hock_to_pass(@puck_hock, angle_to_pass, 0.5)
+    # end
+    
+    assist_angle = @assist_hock.get_angle_to_unit(Utils.get_target_p_in_net(@assist_hock).get_unit)
+    assist_speed = Point.new(@assist_hock.speed_x, @assist_hock.speed_y)
+    Utils.send_hock(@assist_hock, assist_angle, ActionType::TAKE_PUCK, -assist_speed.length / 10.0)
+  end
+  
+  def self.find_place_to_pass
+    free_zone_angle = SmartUtils.find_free_zone(@assist_hock)
+    # if (free_zone_angle == 2.0 * Math::PI)
+      # just pass directly to the assistent
+      return Point.new(@assist_hock.x, @assist_hock.y)
+    # else
+      # dist_pass_area = 100
+      # return Utils.get_p_in_direction_from_unit(@assist_hock, free_zone_angle, dist_pass_area)
+    # end
+
+  end
+  
+  # @param [Point] target_p
+  def self.pass_to_p_accordingly_borders(target_p)
+    now_hock_angle = @puck_hock.angle
+    
+    # create mirror points
+    points = Array.new(5)
+    points[0] = target_p
+    points[1] = Utils.mirror_point(target_p, Axis::X, true)
+    points[2] = Utils.mirror_point(target_p, Axis::X, false)
+    points[3] = Utils.mirror_point(target_p, Axis::Y, true)
+    points[4] = Utils.mirror_point(target_p, Axis::Y, false)
+    
+    min_angle = 2 * Math::PI
+    min_p_i = -1
+    min_dist = GameConst::BIG_NUMBER
+    i = 0
+    for p_i in points do
+      angle = @puck_hock.get_angle_to(p_i.x, p_i.y).abs
+      if (angle <= Math::PI / 3.0)
+        angle = 0.0
+      end
+      
+      # check if this trajectory is clear
+      # TODO: upgrade to check full trajectory with mirror opponents
+      if (Utils.is_danger_area_clear_rot_angle(@puck_hock, angle))
+      
+        if (angle <= min_angle)
+          dist = @puck_hock.get_distance_to(p_i.x, p_i.y)
+          if (3.0 * min_dist > dist)
+            # not too big distance
+            min_angle = angle
+            min_p_i = i
+            min_dist = dist
+          end
+        end
+      end
+      i += 1
+    end
+    
+    if (min_p_i == -1)
+      return false
+    end
+    
+    min_angle_i = min_p_i
+    
+    pass_p = points[min_p_i]    
+    Utils.send_hock_to_p(@puck_hock, pass_p, ActionType::NONE)
+    if (Utils.is_angle_to_pass(@puck_hock, pass_p))
+      # puts 'pass'
+      Utils.send_hock_to_pass_to_p(@puck_hock, pass_p, 0.8)
+    end
+    
+    return true
   end
 end
 
