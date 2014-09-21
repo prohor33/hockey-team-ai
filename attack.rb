@@ -69,6 +69,10 @@ class Attack
     if (Utils.is_angle_to_strike(@puck_hock, net_target_p))
       need_to_strike = false
     
+      if (Logic.game.tick_count > Logic.world.tick_count)
+        # overtime
+        need_to_strike = true
+      end
       if (too_close_to_strike)
         need_to_strike = true
       end

@@ -193,6 +193,27 @@ class Utils
     !is_puck_in_danger
   end
   
+  # @param [Hockeyist]
+  def self.can_kick_someone(hock)
+    danger_area_size = 120
+    danger_area_angle = Math::PI / 12.0
+    
+    can_kick = false
+    for hock_i in Logic.world.hockeyists
+      if (hock_i.player_id == Logic.me)
+        next
+      end
+      if (hock_i.type == HockeyistType::GOALIE)
+        next
+      end
+      if (Utils.is_unit_in_the_hock_area_spec(hock, hock_i, danger_area_size, danger_area_angle))
+        can_kick = true
+        break
+      end
+    end
+    can_kick
+  end
+  
     # @param [Hockeyist] hock
   def self.get_target_p_in_net(hock)
     rink_centre = (Logic.game.rink_bottom + Logic.game.rink_top) / 2.0

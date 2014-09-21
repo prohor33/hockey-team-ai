@@ -25,8 +25,10 @@ class Search
   
   def self.iter
     # Update hockeyist
-    @finder = Utils.get_hock_by_id(@finder.id)
-    @defender = Utils.get_hock_by_id(@defender.id)
+    # @finder = Utils.get_hock_by_id(@finder.id)
+    # @defender = Utils.get_hock_by_id(@defender.id)
+    @finder = Utils.find_the_nearest_player_hock_from_unit(Logic.world.get_my_player, Logic.puck)
+    @defender = Utils.get_my_other_hock(@finder)
     if (@skip_next_iteration)
       @skip_next_iteration = false
       puts 'return'
@@ -39,5 +41,10 @@ class Search
     net_p = Point.new(Logic.me.net_back, (Logic.me.net_top + Logic.me.net_bottom) / 2.0)
     defend_p = Utils.get_middle_between_two_points(Point.from_unit(Logic.puck), net_p)
     Utils.send_hock_to_p(@defender, defend_p, ActionType::TAKE_PUCK)
+    
+    # if defender are able to kick => kick
+    if (Utils.can_kick_someone(@defender))
+      Utils.send_hock_to_unit(@defender, Logic.puck, ActionType::STRIKE)  
+    end
   end
 end
