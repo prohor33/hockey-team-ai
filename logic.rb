@@ -44,6 +44,10 @@ class Logic
   def self.me
     @@me
   end
+  @@opponent = nil
+  def self.opponent
+    @@opponent
+  end
   
   @@old_state = LogicState::NONE
 
@@ -52,6 +56,7 @@ class Logic
     @world = @@world
     @game = @@game
     @@me = @world.get_my_player
+    @@opponent = @world.get_opponent_player
     @me = @@me 
     @@puck = @world.puck
     @puck = @@puck    

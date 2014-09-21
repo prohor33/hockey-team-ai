@@ -31,7 +31,7 @@ class Attack
     @assist_hock = Utils.get_my_other_hock(@puck_hock)
     
     # Observer situation
-    is_danger = !Utils.is_danger_area_clear(@puck_hock)
+    is_danger = SmartUtils.can_smb_kick_hock(@puck_hock)
     
     if (is_danger)
       # need to get rid of the puck
@@ -64,10 +64,12 @@ class Attack
     too_close_to_strike = SmartUtils.too_close_to_strike(@puck_hock)
     too_far_to_strike = SmartUtils.too_far_to_strike(@puck_hock)
     
-    Utils.send_hock_to_p(@puck_hock, net_target_p, ActionType::SWING)
+    Utils.send_hock_to_p(@puck_hock, net_target_p, ActionType::NONE)
     
     if (Utils.is_angle_to_strike(@puck_hock, net_target_p))
       need_to_strike = false
+      
+      Utils.send_hock_to_p(@puck_hock, net_target_p, ActionType::SWING)
     
       if (Logic.game.tick_count > Logic.world.tick_count)
         # overtime

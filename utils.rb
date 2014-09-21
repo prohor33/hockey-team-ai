@@ -1,6 +1,7 @@
 require "./logic"
 require './model/unit'
 require './model/hockeyist_type'
+require './game_const'
 
 class Utils
   
@@ -136,7 +137,7 @@ class Utils
   # @param [Unit] unit
   # @return [False/True class]
   def self.is_unit_in_the_hock_area(hock, unit)
-    is_unit_in_the_hock_area_spec(hock, unit, 120.0, Math::PI / 12.0)
+    is_unit_in_the_hock_area_spec(hock, unit, GameConst::AREA_SIZE, GameConst::AREA_ANGLE)
   end
   
   # @param [Hockeyist] hock
@@ -174,8 +175,8 @@ class Utils
   
   # @param [Hockeyist]
   def self.is_danger_area_clear(hock)
-    danger_area_size = 140
-    danger_area_angle = Math::PI / 10.0
+    danger_area_size = GameConst::AREA_SIZE + 20
+    danger_area_angle = GameConst::AREA_ANGLE + Math::PI / 20.0
     
     is_puck_in_danger = false
     for hock_i in Logic.world.hockeyists
@@ -195,8 +196,8 @@ class Utils
   
   # @param [Hockeyist]
   def self.can_kick_someone(hock)
-    danger_area_size = 120
-    danger_area_angle = Math::PI / 12.0
+    danger_area_size = GameConst::AREA_SIZE
+    danger_area_angle = GameConst::AREA_ANGLE
     
     can_kick = false
     for hock_i in Logic.world.hockeyists
@@ -240,6 +241,20 @@ class Utils
   def self.is_angle_to_strike(hock, target_p)
     min_delta_angle = Math::PI / 180.0
     get_hock_angle_to_p(hock, target_p) <= min_delta_angle
+  end
+  
+  # @param [Hockeyist] attacker
+  # @param [Hockeyist] another
+  def self.can_hock_kick_aother_one(attacker, another)
+    angle = attacker.get_angle_to_unit(another)
+    dist = attacker.get_distance_to_unit(another)
+    if (angle.abs > GameConst::AREA_ANGLE)
+      return false
+    end
+    if (dist > GameConst::AREA_SIZE)
+      return false
+    end
+    return true
   end
   
 end
