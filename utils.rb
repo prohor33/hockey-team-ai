@@ -275,7 +275,7 @@ class Utils
   # @param [Hockeyist] hock
   def self.is_angle_to_strike(hock, target_p)
     min_delta_angle = Math::PI / 180.0
-    get_hock_angle_to_p(hock, target_p) <= min_delta_angle
+    get_hock_angle_to_p(hock, target_p).abs <= min_delta_angle
   end
   
   # @param [Hockeyist] hock

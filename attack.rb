@@ -31,9 +31,8 @@ class Attack
     # Observer situation
     is_danger = SmartUtils.can_smb_kick_hock(@puck_hock)
     
-    # @strategy = AttackStrategy::GET_RID_OF_PUCK
-    
-    # @strategy = AttackStrategy::ATTACK
+    @strategy = AttackStrategy::GET_RID_OF_PUCK    
+    @strategy = AttackStrategy::ATTACK
     if (is_danger)
       # need to get rid of the puck
       @strategy = AttackStrategy::GET_RID_OF_PUCK
@@ -79,6 +78,7 @@ class Attack
       
       if (Utils.is_angle_to_strike(@puck_hock, net_target_p))
         # need_to_strike = false
+        # have a bug here
         need_to_strike = true # to debug
         
         Utils.send_hock_to_p(@puck_hock, net_target_p, ActionType::SWING)
@@ -211,10 +211,6 @@ class Attack
     target_right = Logic.opponent.net_back > rink_center_p.x
     rink_center_p.y = (Logic.game.rink_bottom + Logic.game.rink_top) / 2.0
     target_down = hock.y > rink_center_p.y
-    target_down = true  # to debug
-    if (!target_down)
-      return Point.new(-1, -1)
-    end
     
     shift_x = Utils.get_rink_size.x * 1.0 / 6.0
     shift_y = Utils.get_rink_size.y * 2.0 / 5.0
