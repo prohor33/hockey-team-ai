@@ -8,10 +8,8 @@ require './logic'
 require './utils'
 require './logic_state'
 require './point'
-require 'singleton'
 
 class Defense
-  include Singleton
   @attacker = nil
   @defender = nil
   @skip_next_iteration = false

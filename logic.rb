@@ -4,18 +4,15 @@ require './model/move'
 require './model/hockeyist'
 require './model/world'
 require './model/unit'
-require './logic'
 require './utils'
 require './logic_state'
 require './point'
-require 'singleton'
 require './defense'
 require './search'
 require './attack'
+require './mover'
 
 class Logic
-  include Singleton
-
   @@world = nil
   # getter
   def self.world
@@ -51,7 +48,7 @@ class Logic
   
   @@old_state = LogicState::NONE
 
-  def new_tick
+  def self.new_tick
     Mover.new_tick
     @world = @@world
     @game = @@game
@@ -65,7 +62,7 @@ class Logic
   # @param [World] world_tmp
   # @param [Game] game_tmp
   # @param [Move] move_tmp
-  def run_logic(world, game)
+  def self.run_logic(world, game)
     @@world = world
     @@game = game
     new_tick
@@ -92,7 +89,7 @@ class Logic
     @@old_state = @state
   end
 
-  def defense
+  def self.defense
     # puts 'defense'
     if (@@old_state != LogicState::DEFENSE)
       Defense.start
@@ -100,14 +97,14 @@ class Logic
     Defense.iter
   end
 
-  def attack
+  def self.attack
     if (@@old_state != LogicState::ATTACK)
       Attack.decide
     end
     Attack.iter
   end
 
-  def search
+  def self.search
     # puts 'search'
     if (@@old_state != LogicState::SEARCHING)
       Search.start

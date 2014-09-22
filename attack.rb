@@ -8,7 +8,6 @@ require './logic'
 require './utils'
 require './logic_state'
 require './point'
-require 'singleton'
 require './smart_utils'
 require './axis'
 
@@ -17,9 +16,7 @@ module AttackStrategy
   GET_RID_OF_PUCK = 1
 end
 
-class Attack
-  include Singleton
-  
+class Attack  
   @puck_hock = nil
   @assist_hock = nil
   
@@ -36,6 +33,7 @@ class Attack
     
     # @strategy = AttackStrategy::GET_RID_OF_PUCK
     
+    # @strategy = AttackStrategy::ATTACK
     if (is_danger)
       # need to get rid of the puck
       @strategy = AttackStrategy::GET_RID_OF_PUCK
@@ -67,30 +65,43 @@ class Attack
     too_close_to_strike = SmartUtils.too_close_to_strike(@puck_hock)
     too_far_to_strike = SmartUtils.too_far_to_strike(@puck_hock)
     
-    Utils.send_hock_to_p(@puck_hock, net_target_p, ActionType::NONE)
+    if (too_far_to_strike)
+      good_strike_p = get_good_strike_p(@puck_hock)
+      if (good_strike_p.x == -1)
+        too_far_to_strike = false
+      end      
+      Utils.send_hock_to_p(@puck_hock, good_strike_p, ActionType::NONE)
+    end
+
+    if (!too_far_to_strike)
     
-    if (Utils.is_angle_to_strike(@puck_hock, net_target_p))
-      need_to_strike = false
+      Utils.send_hock_to_p(@puck_hock, net_target_p, ActionType::NONE)
       
-      Utils.send_hock_to_p(@puck_hock, net_target_p, ActionType::SWING)
-    
-      if (Logic.game.tick_count > Logic.world.tick_count)
-        # overtime
-        need_to_strike = true
-      end
-      if (too_close_to_strike)
-        need_to_strike = true
-      end
-      if (@puck_hock.last_action == ActionType::SWING)
-        last_action_time_lef = Logic.game.tick_count - @puck_hock.last_action_tick
-        if (@puck_hock.swing_ticks >= Logic.game.max_effective_swing_ticks)
+      if (Utils.is_angle_to_strike(@puck_hock, net_target_p))
+        # need_to_strike = false
+        need_to_strike = true # to debug
+        
+        Utils.send_hock_to_p(@puck_hock, net_target_p, ActionType::SWING)
+
+        if (Logic.game.tick_count > Logic.world.tick_count)
+          # overtime
           need_to_strike = true
         end
+        if (too_close_to_strike)
+          need_to_strike = true
+        end
+        if (@puck_hock.last_action == ActionType::SWING)
+          last_action_time_lef = Logic.game.tick_count - @puck_hock.last_action_tick
+          if (@puck_hock.swing_ticks >= Logic.game.max_effective_swing_ticks)
+            need_to_strike = true
+          end
+        end
+        
+        if (need_to_strike)
+          Utils.send_hock_to_p(@puck_hock, net_target_p, ActionType::STRIKE)
+        end
       end
-      
-      if (need_to_strike)
-        Utils.send_hock_to_p(@puck_hock, net_target_p, ActionType::STRIKE)
-      end
+    
     end
 
     # other hock stays in the middle
@@ -192,6 +203,26 @@ class Attack
     
     return true
   end
+  
+  # @param [Hockeyist] hock
+  def self.get_good_strike_p(hock)
+    rink_center_p = Point.new(0, 0)
+    rink_center_p.x = (Logic.game.rink_right + Logic.game.rink_left) / 2.0
+    target_right = Logic.opponent.net_back > rink_center_p.x
+    rink_center_p.y = (Logic.game.rink_bottom + Logic.game.rink_top) / 2.0
+    target_down = hock.y > rink_center_p.y
+    target_down = true  # to debug
+    if (!target_down)
+      return Point.new(-1, -1)
+    end
+    
+    shift_x = Utils.get_rink_size.x * 1.0 / 6.0
+    shift_y = Utils.get_rink_size.y * 2.0 / 5.0
+    shift_p = Point.new(target_right ? shift_x : -shift_x, target_down ? shift_y : -shift_y)
+    
+    rink_center_p + shift_p    
+  end
+  
 end
 
 

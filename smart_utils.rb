@@ -17,10 +17,9 @@ class SmartUtils
   
   # @param [Hockeyist] hock
   def self.too_far_to_strike(hock)
-    rink_size_x = Logic.game.rink_right - Logic.game.rink_left
     coef = 0.5
     dist_to_net = (Logic.opponent.net_back - hock.x).abs;
-    dist_to_net > coef * rink_size_x
+    dist_to_net > coef * Utils.get_rink_size.x
   end
   
   # @param [Hockeyist] hock

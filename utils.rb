@@ -340,6 +340,10 @@ class Utils
     end
   end
   
+  def self.get_rink_size
+    Point.new(Logic.game.rink_right - Logic.game.rink_left, Logic.game.rink_bottom - Logic.game.rink_top)
+  end
+  
 end
 
 
