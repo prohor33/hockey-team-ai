@@ -99,7 +99,7 @@ class Logic
 
   def self.attack
     if (@@old_state != LogicState::ATTACK)
-      Attack.decide
+      Attack.start
     end
     Attack.iter
   end

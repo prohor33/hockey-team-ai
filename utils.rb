@@ -279,9 +279,16 @@ class Utils
   end
   
   # @param [Hockeyist] hock
+  # @param [Float] acc_angle
+  def self.is_angle_to_strike_with_accuracy(hock, target_p, acc_angle)
+    min_delta_angle = acc_angle
+    get_hock_angle_to_p(hock, target_p).abs <= min_delta_angle
+  end
+  
+  # @param [Hockeyist] hock
   def self.is_angle_to_pass(hock, target_p)
     min_delta_angle = Math::PI / 3.0
-    get_hock_angle_to_p(hock, target_p) <= min_delta_angle
+    get_hock_angle_to_p(hock, target_p).abs <= min_delta_angle
   end
   
   # @param [Hockeyist] attacker
@@ -342,6 +349,11 @@ class Utils
   
   def self.get_rink_size
     Point.new(Logic.game.rink_right - Logic.game.rink_left, Logic.game.rink_bottom - Logic.game.rink_top)
+  end
+  
+  def self.is_overtime
+    puts 'to overtime left: ' + Logic.world.tick_count.to_s + ' of ' + Logic.game.tick_count.to_s
+    Logic.game.tick_count > Logic.world.tick_count
   end
   
 end
