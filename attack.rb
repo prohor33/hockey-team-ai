@@ -96,29 +96,8 @@ class Attack
       need_to_strike = false
       
       if (Utils.is_angle_to_strike(@puck_hock, net_target_p))
-        Utils.send_hock_to_p(@puck_hock, net_target_p, ActionType::SWING)
-        
-        if (too_close_to_strike)
-          need_to_strike = true
-        end
-        if (SmartUtils.can_smb_kick_hock(@puck_hock))
-          need_to_strike = true
-        end
-        
-        # puts 'last action = ' + @puck_hock.last_action.to_s
-        if (@puck_hock.last_action == ActionType::SWING)
-          last_action_time_lef = Logic.game.tick_count - @puck_hock.last_action_tick
-          puts 'swing ticks: ' + @puck_hock.swing_ticks.to_s + ' of ' + Logic.game.max_effective_swing_ticks.to_s
-          if (@puck_hock.swing_ticks >= Logic.game.max_effective_swing_ticks)
-            need_to_strike = true
-          end
-        end
+        need_to_strike = true
       else
-        # angle start to become not good
-        if (@puck_hock.last_action == ActionType::SWING)
-            need_to_strike = true
-        end
-      end
       
       if (need_to_strike)
         Utils.send_hock_to_p(@puck_hock, net_target_p, ActionType::STRIKE)
