@@ -52,9 +52,9 @@ class Attack
       puts 'decide to attack'
     end
  
-    if (Utils.is_overtime)
+    if (Utils.is_playing_without_goalies)
       @strategy = AttackStrategy::OVERTIME
-      puts 'overtime!'
+      puts 'playing without goalies'
     end
   end
   
@@ -97,7 +97,7 @@ class Attack
       
       if (Utils.is_angle_to_strike(@puck_hock, net_target_p))
         need_to_strike = true
-      else
+      end
       
       if (need_to_strike)
         Utils.send_hock_to_p(@puck_hock, net_target_p, ActionType::STRIKE)

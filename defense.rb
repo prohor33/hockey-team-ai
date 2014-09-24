@@ -42,7 +42,7 @@ class Defense
     # defender stays in the middle
     net_p = Utils.get_player_net_p(Logic.me)
     point_coef = 0.5
-    if (Utils.is_overtime)
+    if (Utils.is_playing_without_goalies)
       point_coef = 0.7
     end
     defend_p = Utils.get_point_between_two_points(Point.from_unit(Logic.puck), net_p, point_coef)

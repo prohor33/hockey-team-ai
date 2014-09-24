@@ -351,9 +351,9 @@ class Utils
     Point.new(Logic.game.rink_right - Logic.game.rink_left, Logic.game.rink_bottom - Logic.game.rink_top)
   end
   
-  def self.is_overtime
-    puts 'to overtime left: ' + Logic.world.tick_count.to_s + ' of ' + Logic.game.tick_count.to_s
-    Logic.game.tick_count > Logic.world.tick_count
+  def self.is_playing_without_goalies
+    # puts 'to overtime left: ' + Logic.world.tick.to_s + ' of ' + Logic.game.tick_count.to_s
+    Logic.world.tick > Logic.game.tick_count && Logic.me.goal_count == 0
   end
   
 end
