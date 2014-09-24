@@ -56,6 +56,8 @@ class Attack
       @strategy = AttackStrategy::OVERTIME
       puts 'playing without goalies'
     end
+    
+    @strategy = AttackStrategy::OVERTIME
   end
   
   def self.iter        
@@ -108,7 +110,7 @@ class Attack
     # other hock stays in the middle
     net_p = Utils.get_player_net_p(Logic.me)
     defend_p = Utils.get_middle_between_two_points(Point.from_unit(Logic.puck), net_p)
-    Utils.send_hock_to_p(@assist_hock, defend_p, ActionType::TAKE_PUCK)
+    Utils.send_hock_to_p_with_slow_down(@assist_hock, defend_p, ActionType::TAKE_PUCK)
   end
   
   def self.get_rid_of_puck
@@ -219,13 +221,13 @@ class Attack
     rink_center_p + shift_p    
   end
   
-  def overtime_strategy
+  def self.overtime_strategy
     @puck_hock = Utils.get_hock_by_id(@puck_hock.id)
     @assist_hock = Utils.get_hock_by_id(@assist_hock.id)
     need_to_strike = false
     
-    net_center_p = Utils.get_player_net_p    
-    acc_angle = Math.atan(Utils.get_player_net_size.y / 2.0 / @puck_hock.get_distance_to(net_center_p.x, net_center_p.y))
+    net_center_p = Utils.get_player_net_p(Logic.opponent) 
+    acc_angle = Math.atan(Utils.get_player_net_size(Logic.opponent).y / 2.0 / @puck_hock.get_distance_to(net_center_p.x, net_center_p.y))
     if (Utils.is_angle_to_strike_with_accuracy(@puck_hock, net_center_p, acc_angle))
       need_to_strike = true
     end

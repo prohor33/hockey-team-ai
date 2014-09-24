@@ -38,7 +38,7 @@ class Search
     # defender stays in the middle
     net_p = Point.new(Logic.me.net_back, (Logic.me.net_top + Logic.me.net_bottom) / 2.0)
     defend_p = Utils.get_middle_between_two_points(Point.from_unit(Logic.puck), net_p)
-    Utils.send_hock_to_p(@defender, defend_p, ActionType::TAKE_PUCK)
+    Utils.send_hock_to_p_with_slow_down(@defender, defend_p, ActionType::TAKE_PUCK)
     
     # if defender are able to kick => kick
     if (Utils.can_kick_someone(@defender))

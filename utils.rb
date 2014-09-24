@@ -74,9 +74,39 @@ class Utils
   # @param [Point] target_p
   # @param [ActionType] action
   def self.send_hock_to_p(hock, target_p, action)
+    send_hock_to_p_with_speed_up(hock, target_p, action, 1.0)
+  end
+  
+  # @param [Hockeyist] hock
+  # @param [Point] target_p
+  # @param [ActionType] action
+  def self.send_hock_to_p_with_slow_down(hock, target_p, action)
+    dist = hock.get_distance_to(target_p.x, target_p.y)
+    speed = Point.new(hock.speed_x, hock.speed_y).length
+    time = dist / speed
+    speed_up_factor = Logic.game.hockeyist_speed_up_factor
+    speed_can_decrease = time * speed_up_factor
+    speed_up = speed_can_decrease < speed ? 1.0 : -1.0
+    
+    in_dir_p = get_p_in_direction_from_unit(hock, hock.angle, 10.0)
+    if (in_dir_p.x * hock.speed_x < 0)
+      # moving back
+      puts 'moving back'
+      speed_up = 1.0
+    else
+      puts 'moving forward'
+    end
+    send_hock_to_p_with_speed_up(hock, target_p, action, speed_up)
+  end
+  
+  # @param [Hockeyist] hock
+  # @param [Point] target_p
+  # @param [ActionType] action
+  # @param [Float] speed_up
+  def self.send_hock_to_p_with_speed_up(hock, target_p, action, speed_up)
     Mover.moves[hock.id].turn = get_hock_angle_to_p(hock, target_p)
     Mover.moves[hock.id].action = action
-    Mover.moves[hock.id].speed_up = 1.0
+    Mover.moves[hock.id].speed_up = speed_up
   end
   
   # @param [Hockeyist] hock

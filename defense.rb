@@ -46,7 +46,7 @@ class Defense
       point_coef = 0.7
     end
     defend_p = Utils.get_point_between_two_points(Point.from_unit(Logic.puck), net_p, point_coef)
-    Utils.send_hock_to_p(@defender, defend_p, ActionType::TAKE_PUCK)
+    Utils.send_hock_to_p_with_slow_down(@defender, defend_p, ActionType::TAKE_PUCK)
     
     # if defender are able to kick => kick
     if (Utils.can_kick_someone(@defender))
