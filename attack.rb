@@ -56,8 +56,6 @@ class Attack
       @strategy = AttackStrategy::OVERTIME
       puts 'playing without goalies'
     end
-    
-    @strategy = AttackStrategy::OVERTIME
   end
   
   def self.iter        
@@ -98,7 +96,26 @@ class Attack
       need_to_strike = false
       
       if (Utils.is_angle_to_strike(@puck_hock, net_target_p))
-        need_to_strike = true
+        Utils.send_hock_to_p(@puck_hock, net_target_p, ActionType::SWING)
+        
+        if (too_close_to_strike)
+          need_to_strike = true
+        end
+        
+        if (SmartUtils.can_smb_kick_hock(@puck_hock))   
+          need_to_strike = true    
+        end
+        
+        if (@puck_hock.last_action == ActionType::SWING)   
+          if (@puck_hock.swing_ticks >= Logic.game.max_effective_swing_ticks)    
+            need_to_strike = true    
+          end    
+        end
+      else   
+        if (@puck_hock.last_action == ActionType::SWING)
+          # angle start to become not good
+          need_to_strike = true    
+        end
       end
       
       if (need_to_strike)
