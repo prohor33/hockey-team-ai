@@ -150,10 +150,8 @@ class Attack
       # puts 'pass'
       # Utils.send_hock_to_pass(@puck_hock, angle_to_pass, 0.5)
     # end
-    
-    assist_angle = @assist_hock.get_angle_to_unit(Utils.get_target_p_in_net(@assist_hock).get_unit)
-    assist_speed = Point.new(@assist_hock.speed_x, @assist_hock.speed_y)
-    Utils.send_hock(@assist_hock, assist_angle, ActionType::TAKE_PUCK, -assist_speed.length / 10.0)
+
+    Utils.send_hock_to_p_with_slow_down(@assist_hock, pass_p, ActionType::TAKE_PUCK)
   end
   
   def self.find_place_to_pass
@@ -258,7 +256,7 @@ class Attack
     # other hock stays in closer to the net
     net_p = Utils.get_player_net_p(Logic.me)
     defend_p = Utils.get_point_between_two_points(Point.from_unit(Logic.puck), net_p, 0.7)
-    Utils.send_hock_to_p(@assist_hock, defend_p, ActionType::TAKE_PUCK)
+    Utils.send_hock_to_p_with_slow_down(@assist_hock, defend_p, ActionType::TAKE_PUCK)
   end
   
 end

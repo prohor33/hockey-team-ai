@@ -83,12 +83,11 @@ class Utils
   def self.send_hock_to_p_with_slow_down(hock, target_p, action)
     dist = hock.get_distance_to(target_p.x, target_p.y)
     speed = Point.new(hock.speed_x, hock.speed_y).length
-    time = dist / speed
-    speed_up_factor = Logic.game.hockeyist_speed_up_factor
-    speed_can_decrease = time * speed_up_factor
-    speed_up = speed_can_decrease < speed ? 1.0 : -1.0
+    max_speed_up_factor = Logic.game.hockeyist_speed_up_factor
+    max_speed = Math.sqrt(2.0 * max_speed_up_factor * dist)
+    speed_up = speed < max_speed ? 1.0 : -1.0
     
-    in_dir_p = get_p_in_direction_from_unit(hock, hock.angle, 10.0)
+    in_dir_p = get_p_in_direction_from_unit(hock, 0.0, 10.0)
     if (in_dir_p.x * hock.speed_x < 0)
       # moving back
       puts 'moving back'
