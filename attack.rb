@@ -224,34 +224,33 @@ class Attack
   # @param [Hockeyist] hock
   def self.get_good_strike_p(hock)
     
-    target_angle = Utils.get_player_net_p(Logic.opponent).x > Utils.get_player_net_p(Logic.me).x ? 0.0 : Math::PI
+    # target_dir = Utils.get_player_net_p(Logic.opponent)
+    target_dir = get_default_strike_p(hock)
+    target_dir -= Point.new(hock.x, hock.y)
+    target_dir.normalize
     
-    max_angle = Math::PI * 2.0 / 3.0
-    delta_angle = max_angle / 50.0
-    angle = target_angle - max_angle
-    min_rot_angle = Math::PI * 100
-    min_angle = Math::PI 
-    while (angle <= (target_angle + max_angle))
-      if (Utils.is_danger_area_clear_rot_angle(hock, angle - hock.angle))
-        rot_angle = (angle - target_angle).abs
-        # rot_angle = 0.0
-        rot_angle += (angle - hock.angle).abs * 0.1
-        if (rot_angle <= min_rot_angle)
-          min_rot_angle = rot_angle
-          min_angle = angle
-        end
+    # find opponents vector
+    from_opp_sum_v = Point.new(0, 0)
+    for hock_i in Logic.world.hockeyists
+      if (hock_i.teammate)
+        next
       end
-      angle += delta_angle
+      if (hock_i.type == HockeyistType::GOALIE)
+        next
+      end
+      from_opp_v = Point.new(hock.x, hock.y) - Point.new(hock_i.x, hock_i.y)
+      dist = from_opp_v.length
+      from_opp_v.normalize
+      from_opp_v *= GameConst::AREA_SIZE / dist * 0.3
+      from_opp_sum_v += from_opp_v
     end
     
-    if (min_angle == Math::PI)
-      # we are surrounded!
-      # TODO: pass?
-      puts 'we are surrounded!'
-      return get_default_strike_p(hock)
+    dir = target_dir + from_opp_sum_v
+    dir_p = Point.new(hock.x, hock.y) + dir
+    if (Utils.is_p_out_of_rink(dir_p))
+      dir_p.y = hock.y
     end
-    puts 'min_angle = ' + min_angle.to_s
-    Utils.get_p_in_direction_from_unit(hock, min_angle - hock.angle, 100)       
+    dir_p
   end
   
   # @param [Hockeyist] hock
