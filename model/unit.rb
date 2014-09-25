@@ -69,6 +69,7 @@ class Unit
   # @param [Unit] unit
   # @return [Float]
   def get_angle_to_unit(unit)
+    # relative!
     get_angle_to(unit.x, unit.y)
   end
 

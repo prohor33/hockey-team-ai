@@ -223,6 +223,39 @@ class Attack
   
   # @param [Hockeyist] hock
   def self.get_good_strike_p(hock)
+    
+    target_angle = Utils.get_player_net_p(Logic.opponent).x > Utils.get_player_net_p(Logic.me).x ? 0.0 : Math::PI
+    
+    max_angle = Math::PI * 2.0 / 3.0
+    delta_angle = max_angle / 50.0
+    angle = target_angle - max_angle
+    min_rot_angle = Math::PI * 100
+    min_angle = Math::PI 
+    while (angle <= (target_angle + max_angle))
+      if (Utils.is_danger_area_clear_rot_angle(hock, angle - hock.angle))
+        rot_angle = (angle - target_angle).abs
+        # rot_angle = 0.0
+        rot_angle += (angle - hock.angle).abs * 0.1
+        if (rot_angle <= min_rot_angle)
+          min_rot_angle = rot_angle
+          min_angle = angle
+        end
+      end
+      angle += delta_angle
+    end
+    
+    if (min_angle == Math::PI)
+      # we are surrounded!
+      # TODO: pass?
+      puts 'we are surrounded!'
+      return get_default_strike_p(hock)
+    end
+    puts 'min_angle = ' + min_angle.to_s
+    Utils.get_p_in_direction_from_unit(hock, min_angle - hock.angle, 100)       
+  end
+  
+  # @param [Hockeyist] hock
+  def self.get_default_strike_p(hock)
     rink_center_p = Point.new(0, 0)
     rink_center_p.x = (Logic.game.rink_right + Logic.game.rink_left) / 2.0
     target_right = Logic.opponent.net_back > rink_center_p.x

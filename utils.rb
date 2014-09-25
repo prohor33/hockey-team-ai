@@ -90,10 +90,7 @@ class Utils
     in_dir_p = get_p_in_direction_from_unit(hock, 0.0, 10.0)
     if (in_dir_p.x * hock.speed_x < 0)
       # moving back
-      puts 'moving back'
       speed_up = 1.0
-    else
-      puts 'moving forward'
     end
     send_hock_to_p_with_speed_up(hock, target_p, action, speed_up)
   end
@@ -178,6 +175,7 @@ class Utils
   # @param [Hockeyist] hock
   # @param [Point] target_p
   def self.get_hock_angle_to_p(hock, target_p)
+    # relative
     hock.get_angle_to_unit(target_p.get_unit)
   end
   
@@ -201,14 +199,17 @@ class Utils
   # @param [Unit] unit
   # @param [Float] area_size
   # @param [Float] area_angle
-  # @param [Float] rot_angle
+  # @param [Float] rot_angle <- relative
   # @return [False/True class]
   def self.is_unit_in_the_hock_area_spec_rot_angle(hock, unit, area_size, area_angle, rot_angle)
     dist = hock.get_distance_to_unit(unit)
     if (dist > area_size)
       return false
     end
-    angle = hock.get_angle_to_unit(unit)
+    angle = hock.get_angle_to_unit(unit)  # relative angle
+    angle += hock.angle # make t absolute
+    angle = normalize_to_minus_p_plus_p(angle)
+    rot_angle += hock.angle # make t absolute too
     if (angle > (rot_angle + area_angle) || angle < (rot_angle - area_angle))
       return false
     end
@@ -237,7 +238,7 @@ class Utils
   end
   
   # @param [Hockeyist]
-  # @param [Float] rot_angle
+  # @param [Float] rot_angle <- relative
   def self.is_danger_area_clear_rot_angle(hock, rot_angle)
     danger_area_size = GameConst::AREA_SIZE + 20
     danger_area_angle = GameConst::AREA_ANGLE + Math::PI / 20.0
@@ -324,7 +325,7 @@ class Utils
   # @param [Hockeyist] attacker
   # @param [Hockeyist] another
   def self.can_hock_kick_another_one(attacker, another)
-    angle = attacker.get_angle_to_unit(another)
+    angle = attacker.get_angle_to_unit(another) # relative angle
     dist = attacker.get_distance_to_unit(another)
     if (angle.abs > GameConst::AREA_ANGLE)
       return false
@@ -340,7 +341,8 @@ class Utils
   # @param [Float] dist
   def self.get_p_in_direction_from_unit(unit, angle_dir, dist)
     angle = unit.angle + angle_dir
-    p_dir = Point.new(1.0, Math.tan(angle))
+    angle = normalize_to_minus_p_plus_p(angle)
+    p_dir = Point.new(((angle < -Math::PI / 2.0) || (angle > Math::PI / 2.0)) ? -1.0 : 1.0, Math.tan(angle))
     p_dir.normalize
     p_dir *= dist
     Point.new(unit.x, unit.y) + p_dir
@@ -384,6 +386,17 @@ class Utils
   def self.is_playing_without_goalies
     # puts 'to overtime left: ' + Logic.world.tick.to_s + ' of ' + Logic.game.tick_count.to_s
     Logic.world.tick > Logic.game.tick_count && Logic.me.goal_count == 0
+  end
+  
+    # @param [Float] angle
+  def self.normalize_to_minus_p_plus_p(angle)
+    while (angle < -Math::PI)
+      angle += 2.0 * Math::PI
+    end
+    while (angle > Math::PI)
+      angle -= 2.0 * Math::PI
+    end
+    angle
   end
   
 end
